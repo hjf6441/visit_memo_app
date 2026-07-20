@@ -1,0 +1,29 @@
+name: visit_memo_app
+description: 智能备忘录+拜访记录语音助手
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  sqflite: ^2.3.0
+  path: ^1.8.3
+  intl: ^0.18.1
+  flutter_local_notifications: ^16.3.2
+  speech_to_text: ^6.5.1
+  permission_handler: ^11.1.0
+  shared_preferences: ^2.2.2
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
