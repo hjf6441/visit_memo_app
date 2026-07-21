@@ -139,7 +139,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.chevron_right),
-                  onPressed: _isExporting ? null : _exportData,
+                  onTap: _isExporting ? null : _exportData,
                 ),
                 if (_exportResult != null)
                   Padding(

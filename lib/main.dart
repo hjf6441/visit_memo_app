@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'models/visit_record.dart';
+import 'models/todo_item.dart';
 import 'services/database_service.dart';
 import 'services/notification_service.dart';
 import 'screens/todo_list_screen.dart';
@@ -10,11 +11,8 @@ import 'screens/voice_input_sheet.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 初始化通知服务
   final notificationService = NotificationService();
   await notificationService.initialize();
-
   runApp(const VisitMemoApp());
 }
 
@@ -52,7 +50,6 @@ class VisitMemoApp extends StatelessWidget {
   }
 }
 
-/// 主界面 — 底部导航栏
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -70,12 +67,8 @@ class _MainScreenState extends State<MainScreen> {
     SettingsScreen(),
   ];
 
-  /// 语音录入 -> 保存记录 -> 自动生成跟进待办
   Future<void> _onVoiceInputResult(VisitRecord record) async {
-    // 1. 保存拜访记录
     final recordId = await _db.insertVisitRecord(record);
-
-    // 2. 自动生成跟进待办（截止时间 = 拜访后3个工作日）
     final followUpDate = _calculateFollowUpDate(record.visitTime);
     final title = record.contactPerson != null
         ? '跟进${record.contactPerson}'
@@ -109,10 +102,8 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  /// 计算3个工作日后的日期
   DateTime _calculateFollowUpDate(DateTime from) {
     DateTime result = from.add(const Duration(days: 3));
-    // 如果落在周末，顺延到周一
     while (result.weekday == DateTime.saturday ||
         result.weekday == DateTime.sunday) {
       result = result.add(const Duration(days: 1));
@@ -150,7 +141,6 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ],
       ),
-      // 语音录入悬浮按钮 — 在待办页和记录页显示
       floatingActionButton: _currentIndex <= 1
           ? FloatingActionButton(
               onPressed: () {
@@ -161,41 +151,5 @@ class _MainScreenState extends State<MainScreen> {
             )
           : null,
     );
-  }
-}
-
-/// 本地 TodoItem 声明（防止数据库服务中的导入冲突）
-class TodoItem {
-  final int? id;
-  final String title;
-  final String? description;
-  final DateTime createdAt;
-  final DateTime? dueDate;
-  final bool isCompleted;
-  final DateTime? completedAt;
-  final int? visitRecordId;
-
-  TodoItem({
-    this.id,
-    required this.title,
-    this.description,
-    DateTime? createdAt,
-    this.dueDate,
-    this.isCompleted = false,
-    this.completedAt,
-    this.visitRecordId,
-  }) : createdAt = createdAt ?? DateTime.now();
-
-  Map<String, dynamic> toMap() {
-    return {
-      if (id != null) 'id': id,
-      'title': title,
-      'description': description,
-      'created_at': createdAt.toIso8601String(),
-      'due_date': dueDate?.toIso8601String(),
-      'is_completed': isCompleted ? 1 : 0,
-      'completed_at': completedAt?.toIso8601String(),
-      'visit_record_id': visitRecordId,
-    };
   }
 }
